@@ -2,7 +2,7 @@
 
 Validador de `types.xml` pra servidor de DayZ.
 
-Fiz isso porque cansei de reiniciar meu servidor (DIA-Z HARDCORE) e descobrir depois que um item parou de nascer por causa de um erro bobo no types: `min` maior que o `nominal`, item duplicado, `usage` escrita errada. O jogo não reclama, o item só some do mapa. Agora eu rodo isso antes de cada restart.
+Fiz isso porque cansei de reiniciar meu servidor (DIA-Z HARDCORE) e descobrir depois que um item parou de nascer por causa de um erro bobo no types: `min` maior que o `nominal`, item duplicado, `usage` escrita errada. O jogo não reclama, o item só some do mapa. A ideia é rodar isso antes de cada restart.
 
 ```
 examples\types_com_erros.xml
@@ -96,6 +96,4 @@ python -m unittest discover -s tests -t .
 
 Os testes também rodam no GitHub Actions a cada push.
 
----
-
-Eduardo Dias · [portfólio](https://edudiasr.github.io/portfolio-web/) · [LinkedIn](https://www.linkedin.com/in/eduardo-dias-99b90a44a)
+Mais projetos meus no [portfólio](https://edudiasr.github.io/portfolio-web/).
