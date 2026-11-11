@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dayz-types-validator"
+version = "1.0.0"
+description = "Valida arquivos types.xml da Central Economy do DayZ"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Eduardo Dias do Rosario" }]
+requires-python = ">=3.10"
+
+[project.scripts]
+types-validator = "types_validator.cli:main"
+
+[tool.setuptools]
+packages = ["types_validator"]
