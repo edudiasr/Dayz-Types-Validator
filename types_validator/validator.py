@@ -157,7 +157,9 @@ class _Checker:
             if tag in values and values[tag] < 0:
                 self.error("E007", f"<{tag}> não pode ser negativo ({values[tag]})", line_of[tag], name)
 
-        if "min" in values and "nominal" in values and values["min"] > values["nominal"]:
+        # com nominal 0 o item não nasce, então o min não faz diferença
+        # (no types.xml do meu servidor eram 172 casos assim, todos de propósito)
+        if "min" in values and values.get("nominal", 0) > 0 and values["min"] > values["nominal"]:
             self.error(
                 "E008",
                 f"min ({values['min']}) maior que nominal ({values['nominal']})",
@@ -191,6 +193,8 @@ class _Checker:
     def check_named_children(self, node: Node, name: str) -> None:
         for tag in ("category", *REPEATABLE_TAGS):
             seen: set[str] = set()
+            unknown: list[tuple[str, bool, int]] = []
+            known = 0
             for child in node.find_all(tag):
                 ref = child.attrs.get("name") or child.attrs.get("user")
                 is_user = "name" not in child.attrs and "user" in child.attrs
@@ -201,13 +205,23 @@ class _Checker:
                 if key in seen:
                     self.warn("W005", f"<{tag} name=\"{ref}\"> repetido", child.line, name)
                 seen.add(key)
-                self.check_against_limits(tag, ref, is_user, child.line, name)
+                if self.exists_in_limits(tag, ref, is_user):
+                    known += 1
+                else:
+                    unknown.append((ref, is_user, child.line))
 
-    def check_against_limits(self, kind: str, ref: str, is_user: bool, line: int, name: str) -> None:
+            for ref, is_user, line in unknown:
+                attr = "user" if is_user else "name"
+                file = "cfglimitsdefinitionuser.xml" if is_user else "cfglimitsdefinition.xml"
+                # usage e value podem ter vários: se sobrou algum que existe, o item ainda nasce por ele
+                if tag in ("usage", "value") and known > 0:
+                    self.warn("W009", f"<{tag} {attr}=\"{ref}\"> não existe no {file} e é ignorado", line, name)
+                else:
+                    self.error("E013", f"<{tag} {attr}=\"{ref}\"> não existe no {file}", line, name)
+
+    def exists_in_limits(self, kind: str, ref: str, is_user: bool) -> bool:
         if self.limits is None:
-            return
+            return True
         if is_user:
-            if self.limits.knows_user(kind) and ref.lower() not in self.limits.user_names[kind]:
-                self.error("E013", f"<{kind} user=\"{ref}\"> não existe no cfglimitsdefinitionuser.xml", line, name)
-        elif self.limits.knows(kind) and ref.lower() not in self.limits.names[kind]:
-            self.error("E013", f"<{kind} name=\"{ref}\"> não existe no cfglimitsdefinition.xml", line, name)
+            return not self.limits.knows_user(kind) or ref.lower() in self.limits.user_names[kind]
+        return not self.limits.knows(kind) or ref.lower() in self.limits.names[kind]
