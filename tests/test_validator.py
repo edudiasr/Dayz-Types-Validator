@@ -84,6 +84,11 @@ class ValueErrors(unittest.TestCase):
     def test_min_above_nominal(self):
         self.assertEqual(codes(check(replace("<min>2</min>", "<min>9</min>"))), ["E008"])
 
+    def test_min_above_zero_nominal_is_fine(self):
+        # nominal 0 = item desligado, o min não importa
+        body = replace("<nominal>4</nominal>", "<nominal>0</nominal>")
+        self.assertEqual(codes(check(body)), [])
+
     def test_quantity_out_of_range(self):
         body = replace("<quantmin>-1</quantmin><quantmax>-1</quantmax>", "<quantmin>10</quantmin><quantmax>150</quantmax>")
         self.assertEqual(codes(check(body)), ["E009"])
@@ -132,6 +137,15 @@ class LimitsRules(unittest.TestCase):
 
     def test_unknown_usage(self):
         body = replace('<usage name="Military"/>', '<usage name="Militar"/>')
+        self.assertEqual(codes(check(body, limits=self.limits)), ["E013"])
+
+    def test_unknown_usage_next_to_a_valid_one_is_warning(self):
+        # o item ainda nasce pela usage que existe
+        body = replace('<usage name="Military"/>', '<usage name="Military"/><usage name="City"/>')
+        self.assertEqual(codes(check(body, limits=self.limits)), ["W009"])
+
+    def test_unknown_category_is_always_error(self):
+        body = replace('<category name="weapons"/>', '<category name="armas"/>')
         self.assertEqual(codes(check(body, limits=self.limits)), ["E013"])
 
     def test_user_list(self):
