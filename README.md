@@ -4,6 +4,8 @@ Validador de `types.xml` pra servidor de DayZ.
 
 Fiz isso porque cansei de reiniciar meu servidor (DIA-Z HARDCORE) e descobrir depois que um item parou de nascer por causa de um erro bobo no types: `min` maior que o `nominal`, item duplicado, `usage` escrita errada. O jogo não reclama, o item só some do mapa. A ideia é rodar isso antes de cada restart.
 
+Tem uma versão que roda no navegador, sem instalar nada: **https://edudiasr.github.io/portfolio-web/validador-types/** (as mesmas regras, portadas pra JavaScript).
+
 ```
 examples\types_com_erros.xml
   linha     7  ERRO  E008 [AKM] min (6) maior que nominal (4)
@@ -60,12 +62,12 @@ Erros:
 - E005 tag repetida dentro do mesmo item (dois `<nominal>`, por exemplo)
 - E006 número que não é número
 - E007 valor negativo em nominal, lifetime, restock, min ou cost
-- E008 min maior que nominal
+- E008 min maior que nominal (só quando nominal > 0, com nominal 0 o item não nasce mesmo)
 - E009 quantmin/quantmax fora de -1 ou 0 a 100
 - E010 quantmin maior que quantmax
 - E011 flag diferente de 0 ou 1
 - E012 usage/value/tag/category sem name
-- E013 nome que não existe no cfglimitsdefinition (só com `-l`)
+- E013 nome que não existe no cfglimitsdefinition (só com `-l`). Pra usage e value só vira erro se o item não tiver nenhuma outra que exista
 
 Avisos:
 
@@ -77,6 +79,9 @@ Avisos:
 - W006 atributo estranho no `<flags>`
 - W007 `<flags>` faltando algum atributo
 - W008 coisa fora de `<type>`
+- W009 usage/value que não existe no cfglimitsdefinition, mas o item tem outra que existe e nasce por ela
+
+Essas duas últimas regras eu ajustei depois de rodar no types.xml de verdade do meu servidor (3123 itens). Na primeira versão dava 1588 erros, mas 172 eram `min > nominal` em item com nominal 0 (desligado de propósito) e o resto era usage "City" e "Underground" que vieram dos types de mods e não existem no meu cfglimitsdefinition. Nenhum item dependia só delas, então virou aviso.
 
 No final ainda soma o nominal por categoria, que ajuda bastante na hora de balancear arma vs comida vs ferramenta.
 
